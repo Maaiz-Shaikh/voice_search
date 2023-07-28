@@ -18,4 +18,8 @@ class AppStrings {
   static String hhmmss = 'HH:MM:SS';
   static String pleaseEnterYoutubeDuration = 'Please enter Youtube Duration';
   static String skipVideo = 'Skip Video';
+
+  static String searchWord = 'Enter the word you want to search';
+  static String search = 'Search';
+  static String pleaseEnterSearchWord = 'Please Enter word';
 }

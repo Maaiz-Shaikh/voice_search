@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 // 3-rd party package
 import 'package:pod_player/pod_player.dart';
-import 'package:voice_search/utils/app_links.dart';
-import 'package:voice_search/utils/app_strings.dart';
+import './utils/app_links.dart';
+import './utils/app_strings.dart';
+import 'api.dart';
 
 class CustomVideoControllers extends StatefulWidget {
   const CustomVideoControllers({Key? key}) : super(key: key);
@@ -25,6 +26,10 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
 
   final durationTextFieldCtr = TextEditingController(
     text: AppStrings.initialDuration,
+  );
+
+  final searchTextFieldCtr = TextEditingController(
+    text: '',
   );
 
   bool alwaysShowProgressBar = true;
@@ -170,6 +175,12 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
 
                     // Jump to input duration of Video
                     _jumpToInputDuration(),
+
+                    // Some Spacing
+                    sizeH20,
+
+                    // Jump to input duration of Video
+                    _jumpToSearchWord(),
                   ],
                 ),
               )
@@ -269,6 +280,78 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
             }
           },
           child: Text(AppStrings.skipVideo),
+        ),
+      ],
+    );
+  }
+
+  Row _jumpToSearchWord() {
+    return Row(
+      children: [
+        // Input textfield for duration
+        Expanded(
+          flex: 2,
+          child: TextField(
+            controller: searchTextFieldCtr,
+            decoration: InputDecoration(
+              labelText: AppStrings.searchWord,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ),
+
+        // Some Spacing
+        const SizedBox(width: 10),
+
+        // Skip video Button
+        ElevatedButton(
+          onPressed: () async {
+            if (searchTextFieldCtr.text.isEmpty) {
+              snackBar(AppStrings.pleaseEnterSearchWord);
+              return;
+            }
+
+            try {
+              snackBar('${AppStrings.loading}....');
+              FocusScope.of(context).unfocus();
+
+              String youtubeVideoCode = 'SPFQX82X03Q';
+              String searchWord = searchTextFieldCtr.text;
+
+              // Call the fetch_data() function to request data from the Flask backend
+              List<String> timestamps =
+                  await fetchData(youtubeVideoCode, searchWord);
+
+              // Process the timestamps list (e.g., show it in a dialog)
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Timestamps for "$searchWord"'),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (String timestamp in timestamps) Text(timestamp),
+                      ],
+                    ),
+                    actions: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            } catch (e) {
+              snackBar(
+                  "${AppStrings.unableToLoad}, ${kIsWeb ? AppStrings.pleaseEnableCorsInWeb : ''} \n$e");
+            }
+          },
+          child: Text(AppStrings.search),
         ),
       ],
     );
