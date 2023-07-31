@@ -1,10 +1,12 @@
 // dart package
 import 'dart:developer';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // 3-rd party package
 import 'package:pod_player/pod_player.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import './utils/app_links.dart';
 import './utils/app_strings.dart';
 import 'api.dart';
@@ -17,8 +19,11 @@ class CustomVideoControllers extends StatefulWidget {
 }
 
 class _CustomVideoControllersState extends State<CustomVideoControllers> {
+  SpeechToText speechToText = SpeechToText();
+  String searchedWord = '';
   late PodPlayerController controller;
   bool? isVideoPlaying;
+  List<String> timestamps = [];
 
   final youtubeTextFieldCtr = TextEditingController(
     text: AppLinks.firstYoutubeLink,
@@ -33,6 +38,9 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
   );
 
   bool alwaysShowProgressBar = true;
+
+  bool isListening = false;
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +66,9 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
   void dispose() {
     controller.removeListener(_listner);
     controller.dispose();
+    youtubeTextFieldCtr.dispose();
+    durationTextFieldCtr.dispose();
+    searchTextFieldCtr.dispose();
     super.dispose();
   }
 
@@ -69,6 +80,23 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
     int seconds = int.parse(timeComponents[2]);
 
     return Duration(hours: hours, minutes: minutes, seconds: seconds);
+  }
+
+  // YT code from YT Link
+  String extractVideoCode(String youtubeLink) {
+    // Define the regular expression pattern to match the video code
+    RegExp regExp = RegExp(r'(?:(?<=v=)|(?<=be/))[a-zA-Z0-9_-]+');
+
+    // Use the firstMatch method to find the first match in the link
+    Match? match = regExp.firstMatch(youtubeLink);
+
+    // Check if a match was found and return the video code
+    if (match != null) {
+      return match.group(0) as String;
+    } else {
+      // Return an empty string or handle the case when no match is found
+      return '';
+    }
   }
 
   @override
@@ -164,17 +192,46 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
                       style: textStyle,
                     ),
 
-                    // Some Spacing
-                    sizeH20,
+                    // // Some Spacing
+                    // sizeH20,
+
+                    Text(searchedWord),
+                    // Time stamp list
+
+                    if (timestamps != [])
+                      Column(
+                        children: [
+                          // Some Spacing
+                          sizeH20,
+
+                          SizedBox(
+                            height: 100,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: timestamps.length,
+                              itemBuilder: (context, index) {
+                                return timeStampWidget(
+                                    timestamps[index].split(',')[0]);
+                              },
+                            ),
+                          ),
+
+                          // Some Spacing
+                          sizeH20,
+                        ],
+                      ),
+
+                    // // Some Spacing
+                    // sizeH20,
 
                     // Youtube URL Video
                     _loadVideoFromYoutube(),
 
-                    // Some Spacing
-                    sizeH20,
+                    // // Some Spacing
+                    // sizeH20,
 
                     // Jump to input duration of Video
-                    _jumpToInputDuration(),
+                    // _jumpToInputDuration(),
 
                     // Some Spacing
                     sizeH20,
@@ -185,6 +242,51 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
                 ),
               )
             ],
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: AvatarGlow(
+        endRadius: 75.0,
+        animate: isListening,
+        duration: const Duration(milliseconds: 2000),
+        repeat: true,
+        repeatPauseDuration: const Duration(milliseconds: 100),
+        child: GestureDetector(
+          onTapDown: (details) async {
+            if (!isListening) {
+              var available = await speechToText.initialize();
+              if (available) {
+                setState(() {
+                  timestamps = [];
+                  isListening = true;
+                  speechToText.listen(
+                    onResult: (result) async {
+                      setState(() {
+                        searchedWord = result.recognizedWords;
+                      });
+                      String youtubeVideoCode =
+                          extractVideoCode(youtubeTextFieldCtr.text);
+
+                      // Call the fetch_data() function to request data from the Flask backend
+                      timestamps =
+                          await fetchData(youtubeVideoCode, searchedWord);
+                    },
+                  );
+                });
+              }
+            }
+          },
+          onTapUp: (details) async {
+            setState(() {
+              isListening = false;
+            });
+
+            speechToText.stop();
+          },
+          child: CircleAvatar(
+            radius: 35,
+            child: Icon(isListening ? Icons.mic : Icons.mic_none),
           ),
         ),
       ),
@@ -288,7 +390,7 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
   Row _jumpToSearchWord() {
     return Row(
       children: [
-        // Input textfield for duration
+        // Input textfield for search word
         Expanded(
           flex: 2,
           child: TextField(
@@ -303,7 +405,7 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
         // Some Spacing
         const SizedBox(width: 10),
 
-        // Skip video Button
+        // Search Button
         ElevatedButton(
           onPressed: () async {
             if (searchTextFieldCtr.text.isEmpty) {
@@ -315,37 +417,38 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
               snackBar('${AppStrings.loading}....');
               FocusScope.of(context).unfocus();
 
-              String youtubeVideoCode = 'SPFQX82X03Q';
+              // String youtubeVideoCode = 'SPFQX82X03Q';
+              String youtubeVideoCode =
+                  extractVideoCode(youtubeTextFieldCtr.text);
               String searchWord = searchTextFieldCtr.text;
 
               // Call the fetch_data() function to request data from the Flask backend
-              List<String> timestamps =
-                  await fetchData(youtubeVideoCode, searchWord);
+              timestamps = await fetchData(youtubeVideoCode, searchWord);
 
               // Process the timestamps list (e.g., show it in a dialog)
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Timestamps for "$searchWord"'),
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (String timestamp in timestamps) Text(timestamp),
-                      ],
-                    ),
-                    actions: [
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  );
-                },
-              );
+              // showDialog(
+              //   context: context,
+              //   builder: (context) {
+              //     return AlertDialog(
+              //       title: Text('Timestamps for "$searchWord"'),
+              //       content: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         mainAxisSize: MainAxisSize.min,
+              //         children: [
+              //           for (String timestamp in timestamps) Text(timestamp),
+              //         ],
+              //       ),
+              //       actions: [
+              //         ElevatedButton(
+              //           onPressed: () => Navigator.pop(context),
+              //           child: const Text('OK'),
+              //         ),
+              //       ],
+              //     );
+              //   },
+              // );
 
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              // ScaffoldMessenger.of(context).hideCurrentSnackBar();
             } catch (e) {
               snackBar(
                   "${AppStrings.unableToLoad}, ${kIsWeb ? AppStrings.pleaseEnableCorsInWeb : ''} \n$e");
@@ -365,5 +468,23 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
           content: Text(text),
         ),
       );
+  }
+
+  Widget timeStampWidget(String time) {
+    return Row(children: [
+      GestureDetector(
+        onTap: () => controller.videoSeekTo(stringToDuration(time)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.amber,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(child: Text(time)),
+        ),
+      ),
+      const SizedBox(
+        width: 10,
+      ),
+    ]);
   }
 }
