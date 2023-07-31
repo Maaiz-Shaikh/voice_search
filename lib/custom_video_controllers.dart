@@ -344,49 +344,6 @@ class _CustomVideoControllersState extends State<CustomVideoControllers> {
     );
   }
 
-  Row _jumpToInputDuration() {
-    return Row(
-      children: [
-        // Input textfield for duration
-        Expanded(
-          flex: 2,
-          child: TextField(
-            controller: durationTextFieldCtr,
-            decoration: InputDecoration(
-              labelText: '${AppStrings.enterDuration} (${AppStrings.hhmmss})',
-              border: const OutlineInputBorder(),
-            ),
-          ),
-        ),
-
-        // Some Spacing
-        const SizedBox(width: 10),
-
-        // Skip video Button
-        ElevatedButton(
-          onPressed: () async {
-            if (durationTextFieldCtr.text.isEmpty) {
-              snackBar(AppStrings.pleaseEnterYoutubeDuration);
-              return;
-            }
-            try {
-              snackBar('${AppStrings.loading}....');
-              FocusScope.of(context).unfocus();
-              controller
-                  .videoSeekTo(stringToDuration(durationTextFieldCtr.text));
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            } catch (e) {
-              snackBar(
-                  "${AppStrings.unableToLoad},${kIsWeb ? AppStrings.pleaseEnableCorsInWeb : ''}  \n$e");
-            }
-          },
-          child: Text(AppStrings.skipVideo),
-        ),
-      ],
-    );
-  }
-
   Row _jumpToSearchWord() {
     return Row(
       children: [
