@@ -1,13 +1,15 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:voice_search/utils/app_links.dart';
+// import 'package:voice_search/utils/app_links.dart';
 
 Future<List<String>> fetchData(
     String youtubeVideoCode, String searchWord) async {
   // Construct the URL with query parameters
+  // final url = Uri.parse(
+  //     '${AppLinks.apiURL}?video_code=$youtubeVideoCode&search_word=$searchWord');
   final url = Uri.parse(
-      '${AppLinks.apiURL}?video_code=$youtubeVideoCode&search_word=$searchWord');
+      'https://video-search-51wv.onrender.com/api?video_code=$youtubeVideoCode&search_word=$searchWord');
 
   try {
     final response = await http.get(url);
