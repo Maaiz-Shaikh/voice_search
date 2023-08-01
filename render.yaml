@@ -1,0 +1,3 @@
+name: voice_search
+buildCommand: flutter build web
+publishDir: build/web
