@@ -2,6 +2,10 @@
 
 Welcome to the Voice-Based Video Content Search web app! This project allows users to effortlessly search for specific words within YouTube videos, utilizing voice recognition or text input. The app provides timestamps of word occurrences, enabling users to navigate directly to relevant segments of the video.
 
+## ⚠️ Copyright Notice
+
+© 2023 Maaiz Shaikh and Ravi Patel. All rights reserved. Unauthorized copying, distribution, or reproduction of this software, its design, or content, in whole or in part, is strictly prohibited and may be subject to legal action.
+
 ## Features
 
 - **Voice and Text Search**: Seamlessly search for keywords within videos by either typing the word or using voice commands through the microphone.
@@ -31,29 +35,33 @@ Welcome to the Voice-Based Video Content Search web app! This project allows use
 <table>
         <tr>
           <td>
-            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/38f5a32f-c40b-484c-907e-412f96e8dc2a"  alt="Light mode without timestamps">
+            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/7e62d59b-04bb-45a9-ae46-f8345da92e74"  alt="Light mode without timestamps">
           </td>
         </tr>       
  </table>
 <table>
         <tr>
           <td>
-            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/c9315ae9-0890-4067-8c3a-fe9df5c37ca6"  alt="Light mode with timestamps">
+            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/435b188a-928c-409f-a0a0-77cfff2c3607"  alt="Light mode with timestamps">
           </td>
         </tr>       
  </table>
  <table>
         <tr>
           <td>
-            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/66605671-2f49-49d4-be21-bb8361663edd"  alt="Dark mode without timestamps">
+            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/7d518fec-8f00-4689-bbc2-a036e75ad3a3"  alt="Dark mode without timestamps">
           </td>
         </tr>       
  </table>
  <table>
         <tr>
           <td>
-            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/3875d2b2-44fc-4881-b828-44045528a532"  alt="Dark mode with timestamps">
+            <img src="https://github.com/Maaiz-Shaikh/voice_search/assets/88193033/f49d5fbb-13a9-4c67-8ba0-09c71790a84f"  alt="Dark mode with timestamps">
           </td>
         </tr>       
  </table>
+ 
+## ⚠️ Copyright Notice
+
+© 2023 Maaiz Shaikh and Ravi Patel. All rights reserved. Unauthorized copying, distribution, or reproduction of this software, its design, or content, in whole or in part, is strictly prohibited and may be subject to legal action.
 
